@@ -48,7 +48,8 @@ public class AccountManager {
 			System.out.print("기본이자%(정수형태로입력): ");
 			iNormalrate = scan.nextInt();
 			System.out.print("신용등급(A,B,C등급): ");
-			iCreditrank = scan.nextLine();
+			// nextLine은 안되는데 next는 된다.. 뭔 이상현상인가..?
+			iCreditrank = scan.next();
 			
 			HighCreditAccount high = new HighCreditAccount(iName, iAccountnum, iMoney, iNormalrate, iCreditrank); 
 			lists.add(high);
