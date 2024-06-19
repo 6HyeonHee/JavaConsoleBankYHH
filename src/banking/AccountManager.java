@@ -17,19 +17,20 @@ public class AccountManager {
 		accountinfo = new HashSet<Account>();
 	}
 
+
 	// 계좌선택
-	public void selectAccount() {
-		Scanner scan = new Scanner(System.in);
-		
-		System.out.println("*** 신규계좌개설 ***");
-		System.out.println("---- 계좌선택 ----");
-		System.out.println("1. 보통계좌");
-		System.out.println("2. 신용계좌");
-		
-		select = scan.nextInt();
-		
-		makeAccount();
-	}
+		public void selectAccount() {
+			Scanner scan = new Scanner(System.in);
+			
+			System.out.println("*** 신규계좌개설 ***");
+			System.out.println("---- 계좌선택 ----");
+			System.out.println("1. 보통계좌");
+			System.out.println("2. 신용계좌");
+			
+			select = scan.nextInt();
+			
+			makeAccount();
+		}
 
 	// 계좌개설
 	public void makeAccount() {
@@ -219,6 +220,5 @@ public class AccountManager {
 			Account acc = itr.next();
 			acc.showAccInfo();
 		}
-		System.out.println("전체계좌정보 출력이 완료되었습니다.");
 	}
 }

@@ -13,6 +13,7 @@ public class HighCreditAccount extends Account {
 		this.creditRank = creditRank;
 	}
 
+
 	private double getCreditRankRate() {
 		switch(creditRank) {
 		case "A": case "a":
@@ -42,6 +43,5 @@ public class HighCreditAccount extends Account {
 		System.out.println("신용등급>" + creditRank);
 		System.out.println("---------------------");
 	}
-	
 	
 }
