@@ -1,5 +1,10 @@
 package banking;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,63 +14,87 @@ import java.util.Scanner;
 
 public class AccountManager {
 	
-	private HashSet<Account> accountinfo;
+	private HashSet<Account> accountinfo = new HashSet<Account>();
 	private int select;
+	private Account newAccount;
 	
 	// 여기서의 i는 main의 개수(50개)를 표현하기 위함이다.
 	public AccountManager(int i) {
-		accountinfo = new HashSet<Account>();
+		
 	}
 
 
 	// 계좌선택
-		public void selectAccount() {
-			Scanner scan = new Scanner(System.in);
+	public void selectAccount() {
+		Scanner scan = new Scanner(System.in);
 			
-			System.out.println("*** 신규계좌개설 ***");
-			System.out.println("---- 계좌선택 ----");
-			System.out.println("1. 보통계좌");
-			System.out.println("2. 신용계좌");
+		System.out.println("*** 신규계좌개설 ***");
+		System.out.println("---- 계좌선택 ----");
+		System.out.println("1. 보통계좌");
+		System.out.println("2. 신용계좌");
 			
-			select = scan.nextInt();
+		select = scan.nextInt();
 			
-			makeAccount();
-		}
+		makeAccount();
+	}
 
 	// 계좌개설
 	public void makeAccount() {
+		
 		Scanner scan = new Scanner(System.in);
 		String iName, iAccountnum, iCreditrank; 
 		int iMoney, iNormalrate;
-		
+		    
 		System.out.print("계좌번호: ");
 		iAccountnum = scan.nextLine();
 		System.out.print("고객이름: ");
 		iName = scan.nextLine();
 		System.out.print("잔고: ");
 		iMoney = scan.nextInt();
-	
-		
+		    
+		Account tempAccount = null;
+		    
 		if (select == 1) {
-			System.out.print("기본이자%(정수형태로입력): ");
-			iNormalrate = scan.nextInt();
-			NormalAccount normal = new NormalAccount(iName, iAccountnum, iMoney, iNormalrate);
-			accountinfo.add(normal);
+		    System.out.print("기본이자%(정수형태로입력): ");
+		    iNormalrate = scan.nextInt();
+		    scan.nextLine();
+		    tempAccount = new NormalAccount(iName, iAccountnum, iMoney, iNormalrate);
 		} else if (select == 2) {
-			System.out.print("기본이자%(정수형태로입력): ");
-			iNormalrate = scan.nextInt();
-			scan.nextLine();
-			System.out.print("신용등급(A,B,C등급): ");
-			iCreditrank = scan.nextLine();
-			
-			HighCreditAccount high = new HighCreditAccount(iName, iAccountnum, iMoney, iNormalrate, iCreditrank); 
-			accountinfo.add(high);
+		    System.out.print("기본이자%(정수형태로입력): ");
+		    iNormalrate = scan.nextInt();
+		    scan.nextLine();
+		    System.out.print("신용등급(A,B,C등급): ");
+		    iCreditrank = scan.nextLine();
+		        
+		    tempAccount = new HighCreditAccount(iName, iAccountnum, iMoney, iNormalrate, iCreditrank); 
 		}
 		
-		
-	}
-	
-	
+		// 컬렉션에 인스턴스 추가
+		boolean yn = accountinfo.add(tempAccount);
+			if(yn==true) {
+				System.out.println("입력되었습니다.");
+			} else {
+				System.out.println("중복된 인스턴스가 발견되었습니다.");
+				System.out.println("중복계좌발견된.덮어쓸까요?(y or n)");
+				String con = scan.nextLine();
+				//equalsIgnoreCase : 대소문자를 구분 안함.
+				if(con.equalsIgnoreCase("y")) {
+					// 덮어쓰기 진행
+					/*
+					 새롭게 입력한 인스턴스(=account)로 기존의 저장된 인스턴스를 삭제한다.
+					 우리의 입장에서는 서로 다른 인스턴스 이지만 Set의 입장에서는
+					 동일한 인스턴스이므로 삭제가 가능한다.
+					*/
+					accountinfo.remove(tempAccount);
+					// 새롭게 입력한 인스턴스를 추가한다.
+					accountinfo.add(tempAccount);
+					System.out.println("계좌 정보가 변경되었습니다..");
+				} else {
+					System.out.println("기존 정보를 유지합니다.");
+				}
+			}
+		}
+
 
 	// 입금
 	public void depositMoney() {
@@ -114,6 +143,7 @@ public class AccountManager {
 			} else {				
 				System.out.println("입금이 완료되었습니다.");
 			}
+			
 			
 		} catch (InputMismatchException e) {
             System.out.println("숫자를 입력해주세요");
@@ -218,7 +248,74 @@ public class AccountManager {
 		
 		while (itr.hasNext()) {
 			Account acc = itr.next();
+			System.out.println("----- 전체 계좌 정보 출력 -----");
 			acc.showAccInfo();
+		}
+	}
+	
+	// 정보 저장
+	public void saveAccountInfo() {
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(
+					new FileOutputStream("src/banking/account_info.obj"));
+			
+			for(Account acc : accountinfo) {
+				out.writeObject(acc);
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// 정보 호출
+	public void readAccountInfo() {
+		try {
+			ObjectInputStream in = new ObjectInputStream(
+					new FileInputStream("src/banking/account_info.obj"));
+			
+			while(true) {
+				Account account = (Account)in.readObject();
+				accountinfo.add(account);
+			}
+		} catch(Exception e) {
+			System.out.println("역직렬화 중 예외발생");
+		} System.out.println("계좌 정보가 복원되었습니다.");
+	}
+	
+	// 자동저장
+	boolean autoSave = false;
+	AutoSaver t = null;
+	
+	public void autoSave() {
+		Scanner scan = new Scanner(System.in);
+		
+		System.out.println("1.자동저장 On / 2.자동저장 Off");
+		int save = scan.nextInt();
+		scan.nextLine();
+		
+		
+		t = new AutoSaver();
+		if(save == 1) {
+			if(!autoSave) {
+				// 자동저장 멘트 실행
+				System.out.println("5초마다 자동저장을 실행합니다.");
+				t.setDaemon(true);
+				t.start();
+				autoSave = true;
+			} else {
+				System.out.println("이미 자동저장이 실행중입니다.");
+			}
+			
+			
+		} else if(save == 2) {
+			if (autoSave && t != null) {
+				// 저장저장 중지
+				t.interrupt();
+				autoSave = false;
+				System.out.println("자동저장을 중지합니다.");				
+			} 
+		} else {
+			System.out.println("1 또는 2를 입력해주세요");
 		}
 	}
 }
