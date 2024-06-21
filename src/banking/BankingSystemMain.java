@@ -4,6 +4,7 @@ package banking;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import banking.AccountManager;
+import banking.AutoSaver;
 
 public class BankingSystemMain {
 
@@ -22,9 +23,9 @@ public class BankingSystemMain {
 	public static void main(String[] args) {
 		
 		Scanner scan = new Scanner(System.in);
-		
 		AccountManager handler = new AccountManager(50);
-		int choice = 0;
+
+		AutoSaver as = null;
 		
 		handler.readAccountInfo();
 		
@@ -33,7 +34,7 @@ public class BankingSystemMain {
 				// 1. 메뉴 출력
 				showMenu();
 				// 2. 사용자로부터 수행할 기능의 메뉴를 입력 받는다.
-				choice = scan.nextInt();
+				int choice = scan.nextInt();
 				scan.nextLine();
 				
 				if(choice<1 || choice>7) {
@@ -55,10 +56,20 @@ public class BankingSystemMain {
 					handler.deleteAccount();
 					break;
 				case ICustomDefine.INQUIRE:
+					System.out.println("----- 전체 계좌 정보 출력 -----");
 					handler.showAccInfo();
 					break;
 				case ICustomDefine.SAVE:
-					handler.autoSave();
+					
+					try {
+						if(!as.isAlive()) {
+							as = new AutoSaver(handler);
+						}
+					} catch(Exception e) {
+						as = new AutoSaver(handler);
+					}
+					
+					handler.dataSaveOption(as);
 					break;
 				case ICustomDefine.EXIT:
 					System.out.println("\n*** 프로그램 종료 ***");

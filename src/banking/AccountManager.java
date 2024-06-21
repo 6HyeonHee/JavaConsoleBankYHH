@@ -1,16 +1,21 @@
 package banking;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.Scanner;
+
 
 public class AccountManager {
 	
@@ -32,10 +37,17 @@ public class AccountManager {
 		System.out.println("---- 계좌선택 ----");
 		System.out.println("1. 보통계좌");
 		System.out.println("2. 신용계좌");
+		System.out.println("3. 특판계좌");
 			
 		select = scan.nextInt();
+		
+		if(!(select == 1 || select == 2 || select == 3)) {
+			throw new IllegalArgumentException("1~3까지의 숫자를 입력해주세요");
+		} else {
+			makeAccount();			
+		}
 			
-		makeAccount();
+		
 	}
 
 	// 계좌개설
@@ -67,6 +79,11 @@ public class AccountManager {
 		    iCreditrank = scan.nextLine();
 		        
 		    tempAccount = new HighCreditAccount(iName, iAccountnum, iMoney, iNormalrate, iCreditrank); 
+		} else if (select == 3) {
+			System.out.print("기본이자%(정수형태로입력): ");
+		    iNormalrate = scan.nextInt();
+		    scan.nextLine();
+		    tempAccount = new SpecialAccount(iName, iAccountnum, iMoney, iNormalrate);
 		}
 		
 		// 컬렉션에 인스턴스 추가
@@ -89,8 +106,10 @@ public class AccountManager {
 					// 새롭게 입력한 인스턴스를 추가한다.
 					accountinfo.add(tempAccount);
 					System.out.println("계좌 정보가 변경되었습니다..");
-				} else {
+				} else if(con.equalsIgnoreCase("n")){
 					System.out.println("기존 정보를 유지합니다.");
+				} else {
+					System.out.println("잘못된 입력입니다.(y 또는 n을 입력하세요)");
 				}
 			}
 		}
@@ -125,9 +144,11 @@ public class AccountManager {
 	                else if(acc instanceof HighCreditAccount) {
 	                	HighCreditAccount highCreditAcc = (HighCreditAccount) acc;
 	                    highCreditAcc.deposit(iDeposit);
-	                } else {
-	                	// NormalAccount가 아닌 경우 기본 입금 처리
-	                    acc.money += iDeposit;
+	                }
+	                // 특판계좌인 경우 입금 횟수도 고려
+	                else if(acc instanceof SpecialAccount){
+	                	SpecialAccount specialAcc = (SpecialAccount) acc;
+	                	specialAcc.deposit(iDeposit);
 	                }
 					isFind = true;
 					break;
@@ -248,7 +269,6 @@ public class AccountManager {
 		
 		while (itr.hasNext()) {
 			Account acc = itr.next();
-			System.out.println("----- 전체 계좌 정보 출력 -----");
 			acc.showAccInfo();
 		}
 	}
@@ -282,40 +302,54 @@ public class AccountManager {
 		} System.out.println("계좌 정보가 복원되었습니다.");
 	}
 	
-	// 자동저장
-	boolean autoSave = false;
-	AutoSaver t = null;
-	
-	public void autoSave() {
-		Scanner scan = new Scanner(System.in);
+	// 컬렉션에 저장된 정보를 Text 파일로 저장하기
+	public void saveTxt() {
 		
-		System.out.println("1.자동저장 On / 2.자동저장 Off");
-		int save = scan.nextInt();
-		scan.nextLine();
-		
-		
-		t = new AutoSaver();
-		if(save == 1) {
-			if(!autoSave) {
-				// 자동저장 멘트 실행
-				System.out.println("5초마다 자동저장을 실행합니다.");
-				t.setDaemon(true);
-				t.start();
-				autoSave = true;
-			} else {
-				System.out.println("이미 자동저장이 실행중입니다.");
+		try {
+			PrintWriter out = new PrintWriter(
+					new FileWriter("src/banking/AutoSaveAccount.txt"));
+			
+			for(Account ac : accountinfo) {
+				out.println(ac);
 			}
 			
+			System.out.println("자동 저장 되었습니다.");
+			out.close();
 			
-		} else if(save == 2) {
-			if (autoSave && t != null) {
-				// 저장저장 중지
-				t.interrupt();
-				autoSave = false;
-				System.out.println("자동저장을 중지합니다.");				
-			} 
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	public void dataSaveOption(AutoSaver as) {
+		
+		System.out.println("저장 옵션 선택");
+		System.out.println("1.자동 저장 On / 2.자동 저장 Off");
+		
+		Scanner scan = new Scanner(System.in);
+		int menu = scan.nextInt();
+		
+		if(menu == 1) {
+			if(!as.isAlive()) {
+				
+				as.setDaemon(true);
+				as.start();
+				System.out.println("자동 저장을 시작합니다.");
+			} else {
+				System.out.println("자동 저장이 이미 실행 중입니다.");
+			}
+		} else if(menu == 2) {
+			if(as.isAlive()) {
+				as.interrupt();
+				System.out.println("자동 저장을 종료합니다");
+			}
 		} else {
 			System.out.println("1 또는 2를 입력해주세요");
 		}
+		
 	}
+	
+	
+	
 }

@@ -1,7 +1,5 @@
 package banking;
 
-import banking.Account;
-
 public class HighCreditAccount extends Account {
 
 	int normalRate;
@@ -42,6 +40,16 @@ public class HighCreditAccount extends Account {
 		System.out.println("기본이자 > " + normalRate + "%");
 		System.out.println("신용등급 > " + creditRank);
 		System.out.println("---------------------");
+	}
+	
+	@Override
+	public String toString() {
+		String str = "계좌번호:" + accountNum + ", "
+				+ "이름:" + name + ", "
+				+ "잔고:" + money + ", "
+				+ "기본이자:" + normalRate + ", "
+				+ "신용등급:" + creditRank;
+		return str;
 	}
 	
 }
