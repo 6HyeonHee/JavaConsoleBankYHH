@@ -65,6 +65,8 @@ BankingSystemMain 파일 실행 시 계좌 관리 관련 메뉴가 실행됩니�
 
 5초마다 한번씩 자동저장이 되도록 하는 기능으로, 자동저장되는 내용은 txt파일에 저장됩니다.
 
+---
+
 ## 추가내용 : 3X3 퍼즐 게임
 
 ![image](https://github.com/6HyeonHee/JavaConsoleBankYHH/assets/119562341/00e2bf7a-de66-431d-864e-b6902d7e7271)
