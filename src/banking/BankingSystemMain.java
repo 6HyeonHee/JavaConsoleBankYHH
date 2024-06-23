@@ -16,7 +16,8 @@ public class BankingSystemMain {
 		System.out.println("4. 계좌정보 삭제");
 		System.out.println("5. 계좌정보 출력");
 		System.out.println("6. 저장 옵션");
-		System.out.println("7. 프로그램 종료");
+		System.out.println("7. 3X3 퍼즐 게임");
+		System.out.println("8. 프로그램 종료");
 		System.out.print("선    택 : ");
 	}
 
@@ -24,6 +25,8 @@ public class BankingSystemMain {
 		
 		Scanner scan = new Scanner(System.in);
 		AccountManager handler = new AccountManager(50);
+		
+		PuzzleGame game = new PuzzleGame();
 
 		AutoSaver as = null;
 		
@@ -38,7 +41,7 @@ public class BankingSystemMain {
 				scan.nextLine();
 				
 				if(choice<1 || choice>7) {
-					throw new IllegalArgumentException("1~7 사이의 정수를 입력하세요");
+					throw new IllegalArgumentException("1~8 사이의 정수를 입력하세요");
 				}
 				
 				// 3. switch문을 통해 선택한 번호에 따라 메서드를 호출한다.
@@ -71,6 +74,9 @@ public class BankingSystemMain {
 					
 					handler.dataSaveOption(as);
 					break;
+				case ICustomDefine.GAME:
+					System.out.println("3X3 퍼즐 게임을 시작합니다.");
+					game.startGame();
 				case ICustomDefine.EXIT:
 					System.out.println("\n*** 프로그램 종료 ***");
 					handler.saveAccountInfo();
